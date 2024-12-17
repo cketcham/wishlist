@@ -1,0 +1,66 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  passwordHash  String
+  name          String?
+  wishlists     Wishlist[]
+  itemChats     ItemChat[]
+  purchases     Purchase[]
+}
+
+model Wishlist {
+  id            Int     @id @default(autoincrement())
+  userId        Int
+  user          User    @relation(fields: [userId], references: [id])
+  title         String
+  description   String?
+  defaultDay    Int?
+  defaultMonth  Int?
+  items         Item[]
+  createdAt     DateTime @default(now())
+}
+
+model Item {
+  id          Int        @id @default(autoincrement())
+  wishlistId  Int
+  wishlist    Wishlist   @relation(fields: [wishlistId], references: [id])
+  name        String?
+  description String?
+  price       Float?
+  currency    String?
+  imageUrl    String?
+  url         String?
+  eventDate   DateTime
+  createdAt   DateTime   @default(now())
+  purchase    Purchase?
+  chats       ItemChat[]
+}
+
+model Purchase {
+  id              Int      @id @default(autoincrement())
+  itemId          Int      @unique
+  item            Item?    @relation(fields: [itemId], references: [id])
+  purchaserUserId Int?
+  purchaser       User?    @relation(fields: [purchaserUserId], references: [id])
+  purchasedAt     DateTime @default(now())
+}
+
+model ItemChat {
+  id        Int     @id @default(autoincrement())
+  itemId    Int
+  item      Item    @relation(fields: [itemId], references: [id])
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id])
+  message   String
+  createdAt DateTime @default(now())
+}
+

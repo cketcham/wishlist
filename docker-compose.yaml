@@ -1,0 +1,36 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: wishlist_user
+      POSTGRES_PASSWORD: wishlist_pass
+      POSTGRES_DB: wishlist_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: always
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgres://wishlist_user:wishlist_pass@postgres:5432/wishlist_db
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
+    restart: always
+
+  frontend:
+    build: ./frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+    depends_on:
+      - backend
+    ports:
+      - "8080:3000"
+    restart: always
+
+volumes:
+  postgres_data:
